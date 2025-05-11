@@ -1,0 +1,313 @@
+import { generateSalt, hashPassword } from "@/lib/auth/passwordHasher";
+import prisma from "@/lib/prisma";
+
+interface SeedUser {
+  name: string;
+  email: string;
+  password: string;
+  roleId: number;
+}
+
+interface SeedEnum {
+  name: string;
+  description?: string;
+  status?: number;
+}
+
+interface SeedStatusEnum extends SeedEnum {
+  colorCode: string;
+}
+
+const usersData: SeedUser[] = [
+  {
+    name: "Sam Munyi",
+    email: "samunyi90@gmail.com",
+    password: "test123",
+    roleId: 1, // Super Admin
+  },
+  {
+    name: "John Doe",
+    email: "john@mail.com",
+    password: "test123",
+    roleId: 2, // Admin
+  },
+  {
+    name: "Jane Doe",
+    email: "jane@mail.com",
+    password: "test123",
+    roleId: 4, // Agent
+  },
+];
+
+const StatusColors = {
+  PENDING: 'bg-yellow-500 dark:bg-yellow-600 text-white',
+  ACTIVE: 'bg-green-500 dark:bg-green-600 text-white',
+  CONFIRMED: 'bg-blue-500 dark:bg-blue-600 text-white',
+  COMPLETED: 'bg-purple-500 dark:bg-purple-600 text-white',
+  CANCELLED: 'bg-red-500 dark:bg-red-600 text-white',
+  UNPAID: 'bg-red-500 dark:bg-red-600 text-white',
+  PAID: 'bg-green-500 dark:bg-green-600 text-white',
+  PARTIALLY_PAID: 'bg-amber-500 dark:bg-amber-600 text-white',
+  ARCHIVED: 'bg-gray-500 dark:bg-gray-600 text-white',
+  SUSPENDED: 'bg-orange-500 dark:bg-orange-600 text-white',
+};
+
+async function seedStatusTables() {
+  // Booking Statuses
+  await seedStatusTable('bookingsStatus', [
+    { 
+      name: "Pending", 
+      colorCode: StatusColors.PENDING,
+      description: "Booking is awaiting confirmation" 
+    },
+    { 
+      name: "Confirmed", 
+      colorCode: StatusColors.CONFIRMED,
+      description: "Booking has been confirmed" 
+    },
+    { 
+      name: "Cancelled", 
+      colorCode: StatusColors.CANCELLED,
+      description: "Booking has been cancelled" 
+    },
+    { 
+      name: "Completed", 
+      colorCode: StatusColors.COMPLETED,
+      description: "Booking has been completed" 
+    },
+  ]);
+
+  // Invoice Statuses
+  await seedStatusTable('invoicesStatus', [
+    { 
+      name: "Unpaid", 
+      colorCode: StatusColors.UNPAID,
+      description: "Invoice has not been paid" 
+    },
+    { 
+      name: "Partially Paid", 
+      colorCode: StatusColors.PARTIALLY_PAID,
+      description: "Invoice has been partially paid" 
+    },
+    { 
+      name: "Paid", 
+      colorCode: StatusColors.PAID,
+      description: "Invoice has been fully paid" 
+    },
+    { 
+      name: "Cancelled", 
+      colorCode: StatusColors.CANCELLED,
+      description: "Invoice has been cancelled" 
+    },
+    { 
+      name: "Refunded", 
+      colorCode: StatusColors.COMPLETED,
+      description: "Invoice has been refunded" 
+    },
+  ]);
+
+  // User Statuses
+  await seedStatusTable('usersStatus', [
+    { 
+      name: "Pending", 
+      colorCode: StatusColors.PENDING,
+      description: "User account is pending approval" 
+    },
+    { 
+      name: "Active", 
+      colorCode: StatusColors.ACTIVE,
+      description: "User account is active" 
+    },
+    { 
+      name: "Archived", 
+      colorCode: StatusColors.ARCHIVED,
+      description: "User account has been archived" 
+    },
+    { 
+      name: "Suspended", 
+      colorCode: StatusColors.SUSPENDED,
+      description: "User account is temporarily suspended" 
+    },
+  ]);
+
+  console.log("Status tables with colors seeded successfully");
+}
+
+async function seedStatusTable(tableName: string, data: SeedStatusEnum[]) {
+  const model = (prisma as any)[tableName];
+  if (!model) {
+    throw new Error(`Status table ${tableName} not found in Prisma client`);
+  }
+
+  for (const item of data) {
+    await model.upsert({
+      where: { name: item.name },
+      update: {},
+      create: {
+        name: item.name,
+        description: item.description || null,
+        colorCode: item.colorCode,
+        status: item.status ?? 1,
+      },
+    });
+    console.log(`Seeded status ${item.name} with color ${item.colorCode}`);
+  }
+}
+
+async function seedEnumTables() {
+  // Transportation Types
+  await seedTable('transportationType', [
+    { name: "Air", description: "Air travel transportation" },
+    { name: "SGR", description: "Standard Gauge Railway" },
+    { name: "SGR Transfer", description: "Transfer service using SGR" },
+    { name: "Road", description: "Road transportation by vehicle" },
+    { name: "Other", description: "Other transportation methods" },
+  ]);
+
+  // Seasons Period Types
+  await seedTable('seasonsPeriodType', [
+    { name: "Low Season", description: "Period with lowest demand and rates" },
+    { name: "Shoulder Season", description: "Transition period between low and high seasons" },
+    { name: "High Season", description: "Period with high demand and rates" },
+    { name: "Peak Season", description: "Period with highest demand and premium rates" },
+  ]);
+
+  // Quotes Statuses
+  await seedTable('quotesStatus', [
+    { name: "Active", description: "Quote is currently active and valid" },
+    { name: "Converted", description: "Quote has been converted to a booking" },
+    { name: "Expired", description: "Quote has expired and is no longer valid" },
+  ]);
+
+  // Rack Rates Travel Periods
+  await seedTable('rackRatesTravelPeriod', [
+    { name: "Low Season", description: "Low season rates" },
+    { name: "Shoulder Season", description: "Shoulder season rates" },
+    { name: "High Season", description: "High season rates" },
+    { name: "Peak Season", description: "Peak season rates" },
+  ]);
+
+  // Payment Methods
+  await seedTable('paymentsPaymentMethod', [
+    { name: "Cash", description: "Payment made with physical cash" },
+    { name: "Credit Card", description: "Payment made with credit/debit card" },
+    { name: "Bank Transfer", description: "Payment made via bank transfer" },
+    { name: "Mobile Money", description: "Payment made via mobile money service" },
+    { name: "Cheque", description: "Payment made with bank cheque" },
+  ]);
+
+  // Meal Plans
+  await seedTable('bookingsMealPlan', [
+    { name: "Room Only", description: "Accommodation only, no meals included" },
+    { name: "Bed and Breakfast", description: "Accommodation with breakfast included" },
+    { name: "Half Board", description: "Accommodation with breakfast and dinner included" },
+    { name: "Full Board", description: "Accommodation with all meals included" },
+    { name: "All Inclusive", description: "Accommodation with all meals and drinks included" },
+  ]);
+
+  // Room Categories
+  await seedTable('bookingsRoomCategory', [
+    { name: "Standard", description: "Standard room category" },
+    { name: "Deluxe", description: "Upgraded room with better amenities" },
+    { name: "Suite", description: "Luxury suite with separate living area" },
+    { name: "Executive", description: "Premium room for business travelers" },
+    { name: "Presidential", description: "Highest category of room available" },
+  ]);
+
+  // Notification Types
+  await seedTable('notificationsType', [
+    { name: "Payment Reminder", description: "Notification about upcoming or overdue payments" },
+    { name: "Booking Confirmation", description: "Notification confirming a booking" },
+    { name: "Invoice Generated", description: "Notification that an invoice has been created" },
+    { name: "Cancellation", description: "Notification about a cancellation" },
+    { name: "System Alert", description: "Important system notification" },
+  ]);
+
+  // User Roles
+  await seedTable('usersRole', [
+    { name: "Super Admin", description: "System administrator with all permissions" },
+    { name: "Admin", description: "Administrator with high-level permissions" },
+    { name: "Manager", description: "Manager with team management permissions" },
+    { name: "Agent", description: "Booking agent with standard permissions" },
+    { name: "Accountant", description: "Finance team member with billing permissions" },
+  ]);
+
+  console.log("Regular enum tables seeded successfully");
+}
+
+async function seedTable(tableName: string, data: SeedEnum[]) {
+  const model = (prisma as any)[tableName];
+  if (!model) {
+    throw new Error(`Table ${tableName} not found in Prisma client`);
+  }
+
+  for (const item of data) {
+    await model.upsert({
+      where: { name: item.name },
+      update: {},
+      create: {
+        name: item.name,
+        description: item.description || null,
+        status: item.status ?? 1,
+      },
+    });
+  }
+}
+
+async function seedUsers(usersData: SeedUser[]) {
+  for (const userData of usersData) {
+    const { name, email, password, roleId } = userData;
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      console.log(`User ${email} already exists, skipping`);
+      continue;
+    }
+
+    const roleExists = await prisma.usersRole.findUnique({ where: { id: roleId } });
+    if (!roleExists) {
+      console.warn(`Role ID ${roleId} not found, skipping user ${email}`);
+      continue;
+    }
+
+    const activeStatus = await prisma.usersStatus.findFirst({ 
+      where: { name: "Active" } 
+    });
+
+    const salt = generateSalt();
+    const hashedPassword = await hashPassword(password, salt);
+
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        salt,
+        role_id: roleId
+      },
+    });
+
+    console.log(`Created user ${email} with role ID ${roleId}`);
+  }
+}
+
+async function main() {
+  console.log("Starting seed process...");
+  
+  try {
+    await seedStatusTables();
+    await seedEnumTables();
+    await seedUsers(usersData);
+    
+    console.log("Seed completed successfully");
+    process.exit(0);
+  } catch (error) {
+    console.error("Error during seeding:", error);
+    process.exit(1);
+  }
+}
+
+main().catch((error) => {
+  console.error("Unhandled error in main:", error);
+  process.exit(1);
+});

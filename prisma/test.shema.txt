@@ -1,0 +1,525 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                  Int      @id @default(autoincrement())
+  user_id             Int
+  type                String
+  provider            String
+  provider_account_id String
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  users               users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([provider, provider_account_id])
+  @@index([user_id], map: "Account_userId_fkey")
+  @@map("accounts")
+}
+
+model Booking {
+  id               Int                  @id @default(autoincrement())
+  booking_ref      String               @unique
+  quote_id         Int                  @unique
+  client_id        Int
+  hotel_id         Int
+  travel_date      DateTime
+  return_date      DateTime
+  meal_plan_id     Int
+  room_category_id Int
+  status_id        Int                  @default(2) // Default to Confirmed
+  voucher_url      String?
+  agent_id         Int
+  invoiceid        Int?                 @unique
+  created_at       DateTime             @default(now())
+  updated_at       DateTime
+  users            users                @relation(fields: [agent_id], references: [id])
+  clients          Client               @relation(fields: [client_id], references: [id])
+  hotels           Hotel                @relation(fields: [hotel_id], references: [id])
+  invoices         invoices?            @relation(fields: [invoiceid], references: [id])
+  quotes           quotes               @relation(fields: [quote_id], references: [id])
+  meal_plan        BookingsMealPlan     @relation(fields: [meal_plan_id], references: [id])
+  room_category    BookingsRoomCategory @relation(fields: [room_category_id], references: [id])
+  status           BookingsStatus?      @relation(fields: [status_id], references: [id], onDelete: SetNull)
+  cancellations    Cancellation[]
+  transportation   transportation[]
+  payments         payments[]           @relation("BookingToPayment")
+
+  @@index([agent_id], map: "Booking_agentId_fkey")
+  @@index([client_id], map: "Booking_clientId_fkey")
+  @@index([hotel_id], map: "Booking_hotelId_fkey")
+  @@map("bookings")
+}
+
+model BookingsStatus {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  colorCode   String
+  status      Int       @default(1)
+  bookings    Booking[]
+
+  @@map("bookings_statuses")
+}
+
+model BookingsMealPlan {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  status      Int       @default(1)
+  bookings    Booking[]
+
+  @@map("bookings_meal_plans")
+}
+
+model BookingsRoomCategory {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  status      Int       @default(1)
+  bookings    Booking[]
+
+  @@map("bookings_room_categories")
+}
+
+model Cancellation {
+  id                Int       @id @default(autoincrement())
+  booking_id        Int
+  cancellation_date DateTime  @default(now())
+  reason            String?
+  hotel_charges     Float
+  credit_note_url   String?
+  refund_amount     Float
+  processed_by_id   Int
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  bookings          Booking[] @relation(fields: [booking_id], references: [id])
+  users             users     @relation(fields: [processed_by_id], references: [id])
+
+  @@index([booking_id], map: "Cancellation_bookingId_fkey")
+  @@index([processed_by_id], map: "Cancellation_processedById_fkey")
+  @@map("cancellations")
+}
+
+model Client {
+  id         Int        @id @default(autoincrement())
+  name       String
+  email      String     @unique
+  phone      String
+  address    String?
+  created_at DateTime   @default(now())
+  updated_at DateTime
+  bookings   Booking[]
+  invoices   invoices[]
+  quotes     quotes[]
+
+  @@map("clients")
+}
+
+model HotelPolicy {
+  id               Int       @id @default(autoincrement())
+  cancellation     String
+  payment_terms    String
+  commission_terms String
+  hotel_id         Int
+  hotels           Hoetl     @relation(fields: [hotel_id], references: [id])
+  seasons          seasons[]
+
+  @@index([hotel_id], map: "HotelPolicy_hotelId_fkey")
+  @@map("hotel_policies")
+}
+
+model Hoetl {
+  id              Int              @id @default(autoincrement())
+  name            String
+  location        String
+  contact_email   String
+  contact_phone   String
+  commission_rate Float?
+  created_at      DateTime         @default(now())
+  updated_at      DateTime
+  bookings        Booking[]
+  hotel_policies  hotel_policies[]
+  rack_rates      rack_rates[]
+  rate_cards      rate_cards[]
+
+  @@map("hotels")
+}
+
+model invoices {
+  id             Int            @id @default(autoincrement())
+  invoice_number String         @unique
+  quote_id       Int            @unique
+  client_id      Int
+  amount         Float
+  tax_amount     Float          @default(0)
+  total_amount   Float
+  due_date       DateTime
+  status_id      Int            @default(1) // Default to Unpaid
+  created_at     DateTime       @default(now())
+  updated_at     DateTime
+  bookings       Booking?
+  clients        clients        @relation(fields: [client_id], references: [id])
+  quotes         quotes         @relation(fields: [quote_id], references: [id])
+  payments       payments[]
+  reminders      reminders[]
+  users          users[]        @relation("InvoiceToUser")
+  status         invoicesStatus @relation(fields: [status_id], references: [id])
+
+  @@index([client_id], map: "Invoice_clientId_fkey")
+  @@map("invoices")
+}
+
+model invoicesStatus {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  colorCode   String
+  status      Int        @default(1)
+  invoices    invoices[]
+}
+
+model notifications {
+  id             Int               @id @default(autoincrement())
+  user_id        Int
+  title          String
+  message        String
+  is_read        Boolean           @default(false)
+  read_at        DateTime?
+  type_id        Int
+  reference_id   Int?
+  reference_type String?
+  created_at     DateTime          @default(now())
+  updated_at     DateTime
+  users          users             @relation(fields: [user_id], references: [id])
+  type           notificationsType @relation(fields: [type_id], references: [id])
+
+  @@index([user_id], map: "Notification_userId_fkey")
+}
+
+model notificationsType {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
+  description   String?
+  status        Int             @default(1)
+  notifications notifications[]
+}
+
+model payments {
+  id                Int                   @id @default(autoincrement())
+  invoice_id        Int
+  amount            Float
+  payment_date      DateTime              @default(now())
+  payment_method_id Int
+  transaction_id    String?
+  receipt_url       String?
+  is_confirmed      Boolean               @default(false)
+  confirmed_at      DateTime?
+  created_at        DateTime              @default(now())
+  updated_at        DateTime
+  invoices          invoices              @relation(fields: [invoice_id], references: [id])
+  payment_method    paymentsPaymentMethod @relation(fields: [payment_method_id], references: [id])
+  bookings          bookings[]            @relation("BookingToPayment")
+
+  @@index([invoice_id], map: "Payment_invoiceId_fkey")
+}
+
+model paymentsPaymentMethod {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  status      Int        @default(1)
+  payments    payments[]
+}
+
+model permissions {
+  id            Int      @id @default(autoincrement())
+  role          Int
+  user_id       Int
+  tbl           String   @db.VarChar(50)
+  rec           Int      @default(0)
+  general       Int      @default(0)
+  create        Int      @default(0)
+  read          Int      @default(0)
+  update        Int      @default(0)
+  delete        Int      @default(0)
+  custom_action String?  @db.VarChar(40)
+  added_by      Int      @default(0)
+  created_at    DateTime @default(now())
+  updated_at    DateTime
+  status        Int      @default(1)
+
+  @@index([role], map: "group_id")
+  @@index([rec], map: "idx_o_permissions_rec")
+  @@index([status], map: "idx_o_permissions_status")
+  @@index([tbl], map: "idx_o_permissions_tbl")
+  @@index([user_id], map: "user_id")
+}
+
+model quotes {
+  id              Int          @id @default(autoincrement())
+  rate_card_id    Int
+  client_id       Int
+  status_id       Int          @default(1) // Default to Active
+  expiration_date DateTime
+  created_at      DateTime     @default(now())
+  updated_at      DateTime
+  bookings        bookings?
+  invoices        invoices?
+  clients         clients      @relation(fields: [client_id], references: [id])
+  rate_cards      rate_cards   @relation(fields: [rate_card_id], references: [id])
+  status          quotesStatus @relation(fields: [status_id], references: [id])
+
+  @@index([client_id], map: "Quote_clientId_fkey")
+  @@index([rate_card_id], map: "Quote_rateCardId_fkey")
+}
+
+model quotesStatus {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  status      Int      @default(1)
+  quotes      quotes[]
+}
+
+model rack_rates {
+  id               Int                   @id @default(autoincrement())
+  rate             Float
+  currency         String                @default("KES")
+  travel_period_id Int
+  meal_plan_id     Int
+  room_category_id Int
+  pdf_url          String?
+  isProcessed      Boolean               @default(false)
+  processed_date   DateTime?
+  hotel_id         Int
+  created_at       DateTime              @default(now())
+  updated_at       DateTime
+  hotels           hotels                @relation(fields: [hotel_id], references: [id])
+  rate_cards       rate_cards[]
+  travel_period    rackRatesTravelPeriod @relation(fields: [travel_period_id], references: [id])
+  meal_plan        rackRatesMealPlan     @relation(fields: [meal_plan_id], references: [id])
+  room_category    rackRatesRoomCategory @relation(fields: [room_category_id], references: [id])
+
+  @@index([hotel_id], map: "RackRate_hotelId_fkey")
+}
+
+model rackRatesTravelPeriod {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  description String?
+  status      Int          @default(1)
+  rack_rates  rack_rates[]
+}
+
+model rackRatesMealPlan {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  description String?
+  status      Int          @default(1)
+  rack_rates  rack_rates[]
+}
+
+model rackRatesRoomCategory {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  description String?
+  status      Int          @default(1)
+  rack_rates  rack_rates[]
+}
+
+model rate_cards {
+  id               Int                   @id @default(autoincrement())
+  name             String
+  base_rate        Float
+  commission_rate  Float?
+  markup_rate      Float?
+  discount_amount  Float?
+  discount_percent Float?
+  final_rate       Float
+  currency         String                @default("USD")
+  travel_period_id Int
+  meal_plan_id     Int
+  room_category_id Int
+  commission       Float?
+  is_active        Boolean               @default(true)
+  rack_rate_id     Int
+  hotel_id         Int
+  created_by_id    Int
+  created_at       DateTime              @default(now())
+  updated_at       DateTime
+  quotes           quotes[]
+  users            users                 @relation(fields: [created_by_id], references: [id])
+  hotels           hotels                @relation(fields: [hotel_id], references: [id])
+  rack_rates       rack_rates            @relation(fields: [rack_rate_id], references: [id])
+  travel_period    rateCardsTravelPeriod @relation(fields: [travel_period_id], references: [id])
+  meal_plan        rateCardsMealPlan     @relation(fields: [meal_plan_id], references: [id])
+  room_category    rateCardsRoomCategory @relation(fields: [room_category_id], references: [id])
+
+  @@index([created_by_id], map: "RateCard_createdById_fkey")
+  @@index([hotel_id], map: "RateCard_hotelId_fkey")
+  @@index([rack_rate_id], map: "RateCard_rackRateId_fkey")
+}
+
+model rateCardsTravelPeriod {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  description String?
+  status      Int          @default(1)
+  rate_cards  rate_cards[]
+}
+
+model rateCardsMealPlan {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  description String?
+  status      Int          @default(1)
+  rate_cards  rate_cards[]
+}
+
+model rateCardsRoomCategory {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  description String?
+  status      Int          @default(1)
+  rate_cards  rate_cards[]
+}
+
+model reminders {
+  id            Int       @id @default(autoincrement())
+  invoice_id    Int
+  reminder_date DateTime
+  message       String
+  is_sent       Boolean   @default(false)
+  sent_at       DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime
+  invoices      invoices  @relation(fields: [invoice_id], references: [id])
+
+  @@index([invoice_id], map: "Reminder_invoiceId_fkey")
+}
+
+model seasons {
+  id              Int               @id @default(autoincrement())
+  name            String
+  period_type_id  Int
+  start_date      DateTime
+  end_date        DateTime
+  hotel_policy_id Int
+  hotel_policies  hotel_policies    @relation(fields: [hotel_policy_id], references: [id])
+  period_type     seasonsPeriodType @relation(fields: [period_type_id], references: [id])
+
+  @@index([hotel_policy_id], map: "SeasonDate_hotelPolicyId_fkey")
+}
+
+model seasonsPeriodType {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  status      Int       @default(1)
+  seasons     seasons[]
+}
+
+model sessions {
+  id            Int      @id @default(autoincrement())
+  session_token String   @unique
+  user_id       Int
+  expires       DateTime
+  created_at    DateTime @default(now())
+  updated_at    DateTime
+  status        Int      @default(1)
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id], map: "Session_userId_fkey")
+}
+
+model transportation {
+  id              Int                  @id @default(autoincrement())
+  type_id         Int
+  provider        String
+  booking_ref     String?
+  departure_date  DateTime
+  return_date     DateTime?
+  departure_point String
+  arrival_point   String
+  cost            Float
+  booking_id      Int
+  status_id       Int                  @default(2) // Default to Confirmed
+  created_at      DateTime             @default(now())
+  updated_at      DateTime
+  bookings        bookings             @relation(fields: [booking_id], references: [id])
+  type            transportationType   @relation(fields: [type_id], references: [id])
+  status          transportationStatus @relation(fields: [status_id], references: [id])
+
+  @@index([booking_id], map: "Transportation_bookingId_fkey")
+}
+
+model transportationType {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  description     String?
+  status          Int              @default(1)
+  transportations transportation[]
+}
+
+model transportationStatus {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  description     String?
+  colorCode       String
+  status          Int              @default(1)
+  transportations transportation[]
+}
+
+model users {
+  id             Int             @id @default(autoincrement())
+  name           String
+  email          String          @unique
+  email_verified DateTime?
+  image          String?
+  password       String
+  salt           String?         @db.VarChar(255)
+  role_id        Int             @default(4) // Default to Agent
+  created_at     DateTime        @default(now())
+  updated_at     DateTime
+  status_id      Int             @default(1) // Default to Pending
+  accounts       accounts[]
+  bookings       bookings[]
+  cancellations  cancellations[]
+  notifications  notifications[]
+  rate_cards     rate_cards[]
+  sessions       sessions[]
+  invoices       invoices[]      @relation("InvoiceToUser")
+  role           usersRole       @relation(fields: [role_id], references: [id])
+  status         usersStatus     @relation(fields: [status_id], references: [id])
+}
+
+model usersRole {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+  status      Int     @default(1)
+  users       users[]
+}
+
+model usersStatus {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+  colorCode   String
+  status      Int     @default(1)
+  users       users[]
+}
