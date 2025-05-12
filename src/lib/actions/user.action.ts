@@ -13,15 +13,6 @@ import { nanoid } from "nanoid";
 import { nowDatetimeObject } from "../constants";
 import { getBranchesByUids, handleCrudError } from "./util.action";
 
-
-type FindAllUsersProps = {
-  page: number;
-  rpp: number;
-  role: string;
-  status: string;
-  search: string
-}
-
 export async function createUser(userData: CreateUserValues) {
 
   // get current user
@@ -38,7 +29,7 @@ export async function createUser(userData: CreateUserValues) {
     throw new Error("You don't have permission to perform this action");
   }
 
-  const { success, data, error } = createUserSchema.safeParse(userData);
+  const { success, data } = createUserSchema.safeParse(userData);
 
   if (!success) {
     throw new Error("Input validation failed");
@@ -99,7 +90,7 @@ export async function updateUser(userId: number, userData: Partial<EditUserValue
 
   // Validate input data (make password optional for updates)
   const updateSchema = editUserSchema.partial({ password: true });
-  const { success, data, error } = updateSchema.safeParse(userData);
+  const { success, data } = updateSchema.safeParse(userData);
 
   if (!success) {
     throw new Error("Input validation failed");
@@ -222,79 +213,6 @@ export async function updateUser(userId: number, userData: Partial<EditUserValue
   } catch (error: unknown) {
     handleCrudError(error);
   }
-}
-
-
-export async function getAllUsers(
-  { page, rpp, role, status, search }: FindAllUsersProps
-) {
-
-  console.log({ page, rpp, role, status, search });
-
-  const where: any = {};
-
-  if (role && role !== "all") {
-    where.role = role;
-
-  }
-  if (status && status !== "all") {
-    where.status = status;
-  }
-
-  if (search) {
-    console.log("searching for: ", search);
-    where.OR = [
-      {
-        name: {
-          contains: search,
-          // mode: "insensitive", this is valid for postgresql
-          // but not for mysql
-        },
-      },
-      {
-        email: {
-          contains: search,
-          // mode: "insensitive", // mode: "insensitive", this is valid for postgresql
-          // but not for mysql
-        },
-      },
-    ];
-  }
-
-  const [users, totalCount] = await Promise.all([
-    prisma.users.findMany({
-      where,
-      skip: (page - 1) * rpp,
-      take: rpp,
-      orderBy: {
-        created_at: "desc",
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        email_verified: true,
-        image: true,
-        role: true,
-        status: true,
-        created_at: true,
-        updated_at: true,
-      },
-    }),
-    prisma.users.count({ where }),
-  ]);
-
-  console.log({ users, totalCount });
-
-  return {
-    data: users,
-    pagination: {
-      total: totalCount,
-      page,
-      limit: rpp,
-      totalPages: Math.ceil(totalCount / rpp),
-    },
-  };
 }
 
 

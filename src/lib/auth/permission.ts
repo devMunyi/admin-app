@@ -40,8 +40,12 @@ export default async function hasPermission(
         };
 
         if (isColumn) {
+            // ignore any
+            /* eslint-disable @typescript-eslint/no-explicit-any */
             (whereConditions as any)[act] = 1;
         } else {
+
+            /* eslint-disable @typescript-eslint/no-explicit-any */
             (whereConditions as any)['custom_action'] = act;
         }
 

@@ -58,6 +58,7 @@ export async function signIn(values: signInFormInferSchema) {
     await createUserSession(user, await cookies());
 
     return { success: true };
+    /* eslint-disable @typescript-eslint/no-explicit-any */
   } catch (error: any) {
     throw new Error(error.message || "Something went wrong");
   }

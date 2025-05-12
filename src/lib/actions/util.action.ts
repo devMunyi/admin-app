@@ -1,3 +1,4 @@
+import { cache } from "react";
 import prisma from "../prisma";
 
 export async function isNationalIdTaken(national_id: string, excludingUserId?: number): Promise<boolean> {
@@ -51,6 +52,7 @@ export async function isPhoneTaken(phone: string, excludingUserId?: number): Pro
     return true; // Phone is taken
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function handleCrudError(error: any): never {
     const code = error?.code || "unknown_error";
 
@@ -75,13 +77,12 @@ export function handleCrudError(error: any): never {
 }
 
 
-export async function getBranches() {
+export const getBranches = cache(async () => {
     return await prisma.branches.findMany({
         select: { id: true, name: true },
         orderBy: { name: "asc" },
     });
-}
-
+});
 
 export async function getBranchesByUids(branchUids: number[]) {
     return await prisma.branches.findMany({
