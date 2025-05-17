@@ -7,41 +7,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Form from '@/components/temp-ui/Form';
 import Label from '@/components/temp-ui/form/Label';
 import Input from '@/components/temp-ui/form/input/InputField';
 import { USER_ROLES, USER_STATUSES } from '@/lib/constants';
 import { editUserSchema, EditUserValues } from '@/lib/validators/authSchema';
 import Select from '@/components/temp-ui/form/Select';
-import { updateUser } from '@/lib/actions/user.action';
-import { useRouter } from 'next/navigation';
-import { useClientCallbackUrl } from '@/lib/url/client';
 import { users_role, users_status } from '@/generated/prisma';
-import { Branch } from './users-table';
-
-type EditUserModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
-  branches: { id: number; name: string }[];
-  user: {
-    id: number;
-    name: string;
-    phone: string;
-    national_id: string;
-    branch: Branch;
-    email: string;
-    role: users_role;
-    status: users_status;
-  } | null;
-}
+import { useUpdateUserMutation } from '@/lib/services/api/users/mutation';
+import { EditUserModalProps } from '@/lib/types';
 
 export default function EditUserModal({ isOpen, onClose, onSuccess, user, branches }: EditUserModalProps) {
-
-  const [pending, setPending] = useState(false);
-  const router = useRouter();
-  const callbackUrl = useClientCallbackUrl({ includeOrigin: true });
   const {
     register,
     handleSubmit,
@@ -58,7 +35,7 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user, branch
       email: '',
       role: undefined,
       status: undefined,
-      password: '', // Optional for edit
+      password: '',
     },
     reValidateMode: "onChange",
   });
@@ -69,33 +46,24 @@ export default function EditUserModal({ isOpen, onClose, onSuccess, user, branch
       setValue('name', user.name);
       setValue('phone', user.phone);
       setValue('national_id', user.national_id);
-      setValue('branch_id', user.branch.id || 1);
+      setValue('branch_id', user.branch.id);
       setValue('email', user.email);
       setValue('role', user.role);
       setValue('status', user.status);
     }
   }, [user, setValue]);
 
-  const onSubmit = (data: EditUserValues) => {
-    if (!user) return;
+  const { mutate: updateUserMutate, isPending: pending } = useUpdateUserMutation({
+    userId: user?.public_id || '',
+    onSuccess,
+    onClose,
+    resetForm: reset
+  });
 
-    setPending(true);
-    updateUser(Number(user.id), data).then((resp) => {
-      toast.success("User updated successfully!");
-      // reset();
-      onSuccess?.();
-      onClose();
-      reset();
-    }).catch((error) => {
-      const message = error?.message || "Something went wrong";
-      if (message.toLowerCase() === "session expired") {
-        router.push(`/signin?callbackUrl=${callbackUrl}`);
-      }
-      toast.error(message);
-    }).finally(() => {
-      setPending(false);
-    })
-  }
+  const onSubmit = (data: EditUserValues) => {
+    updateUserMutate(data);
+  };
+
 
   return (
     <Modal

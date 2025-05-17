@@ -6,7 +6,7 @@ import { ModifiedFields, SafeUser, StoreChangeLogParams } from "./types"
 import { nowDatetimeObject, USER_EVENTS_WITH_ONLY_STATUS_UPDATE } from "./constants"
 import { shared_status } from "@/generated/prisma"
 import { createHash } from "crypto"
-import { EnvType } from "./data/env/type"
+import { EnvType } from "./services/env/type"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -296,4 +296,9 @@ export function getPositiveIntParam(params: URLSearchParams, key: string): numbe
   const param = params.get(key);
   const num = param ? parseInt(param) : NaN;
   return num > 0 ? num : undefined;
+}
+
+
+export function safeTrim(str: unknown, fallback = '') {
+  return typeof str === 'string' ? str.trim() : fallback;
 }

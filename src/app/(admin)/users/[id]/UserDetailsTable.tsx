@@ -1,12 +1,16 @@
-import { UserInfo } from "@/components/events/type";
+import Avatar from "@/components/Avatar";
 import Badge from "@/components/temp-ui/badge/Badge";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/temp-ui/table";
 import { users_status } from "@/generated/prisma";
 import { formatDateString, toRelativeTime } from "@/lib/dates";
+import { UserInfo } from "@/lib/types";
 import { capitalizeString } from "@/lib/utils";
-import Image from "next/image";
 
 export const UserDetailsTable: React.FC<{ user: UserInfo }> = ({ user }) => {
+
+
+    console.log({ UsersTable: user });
+
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
             <div className="max-w-full overflow-x-auto">
@@ -29,12 +33,7 @@ export const UserDetailsTable: React.FC<{ user: UserInfo }> = ({ user }) => {
                             <TableCell className="px-5 py-4 sm:px-6 text-start">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 overflow-hidden rounded-full">
-                                        <Image
-                                            width={40}
-                                            height={40}
-                                            src={user.image || "/images/user/user-17.jpg"}
-                                            alt={user.name}
-                                        />
+                                        <Avatar width={40} height={40} src={user.image} alt="user image" name={user.name} />
                                     </div>
                                     <div>
                                         <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
@@ -52,7 +51,7 @@ export const UserDetailsTable: React.FC<{ user: UserInfo }> = ({ user }) => {
                                 Role
                             </TableCell>
                             <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 text-theme-sm dark:text-gray-400">
-                                {capitalizeString(user.role)}
+                                {capitalizeString(user?.role || "")}
                             </TableCell>
                         </TableRow>
                         <TableRow>

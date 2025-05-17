@@ -796,8 +796,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.7.0
-   * Query Engine version: 3cff47a7f5d65c3ea74883f1d736e41d68ce91ed
+   * Prisma Client JS version: 6.8.2
+   * Query Engine version: 2060c79ba17c6bb9f5823312b6f6b7f4a845738e
    */
   export type PrismaVersion = {
     client: string
@@ -21965,7 +21965,6 @@ export namespace Prisma {
     email: string | null
     email_verified: Date | null
     password: string | null
-    salt: string | null
     role: $Enums.users_role | null
     created_at: Date | null
     updated_at: Date | null
@@ -21986,7 +21985,6 @@ export namespace Prisma {
     email: string | null
     email_verified: Date | null
     password: string | null
-    salt: string | null
     role: $Enums.users_role | null
     created_at: Date | null
     updated_at: Date | null
@@ -22007,7 +22005,6 @@ export namespace Prisma {
     email: number
     email_verified: number
     password: number
-    salt: number
     role: number
     created_at: number
     updated_at: number
@@ -22040,7 +22037,6 @@ export namespace Prisma {
     email?: true
     email_verified?: true
     password?: true
-    salt?: true
     role?: true
     created_at?: true
     updated_at?: true
@@ -22061,7 +22057,6 @@ export namespace Prisma {
     email?: true
     email_verified?: true
     password?: true
-    salt?: true
     role?: true
     created_at?: true
     updated_at?: true
@@ -22082,7 +22077,6 @@ export namespace Prisma {
     email?: true
     email_verified?: true
     password?: true
-    salt?: true
     role?: true
     created_at?: true
     updated_at?: true
@@ -22190,7 +22184,6 @@ export namespace Prisma {
     email: string
     email_verified: Date | null
     password: string
-    salt: string | null
     role: $Enums.users_role
     created_at: Date
     updated_at: Date | null
@@ -22230,7 +22223,6 @@ export namespace Prisma {
     email?: boolean
     email_verified?: boolean
     password?: boolean
-    salt?: boolean
     role?: boolean
     created_at?: boolean
     updated_at?: boolean
@@ -22264,7 +22256,6 @@ export namespace Prisma {
     email?: boolean
     email_verified?: boolean
     password?: boolean
-    salt?: boolean
     role?: boolean
     created_at?: boolean
     updated_at?: boolean
@@ -22279,7 +22270,7 @@ export namespace Prisma {
     image?: boolean
   }
 
-  export type usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "email_verified" | "password" | "salt" | "role" | "created_at" | "updated_at" | "status" | "deleted_at" | "public_id" | "password_expiry" | "two_factor_enabled" | "national_id" | "phone" | "branch_id" | "image", ExtArgs["result"]["users"]>
+  export type usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "email_verified" | "password" | "role" | "created_at" | "updated_at" | "status" | "deleted_at" | "public_id" | "password_expiry" | "two_factor_enabled" | "national_id" | "phone" | "branch_id" | "image", ExtArgs["result"]["users"]>
   export type usersInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     accounts?: boolean | users$accountsArgs<ExtArgs>
     bookings?: boolean | users$bookingsArgs<ExtArgs>
@@ -22314,7 +22305,6 @@ export namespace Prisma {
       email: string
       email_verified: Date | null
       password: string
-      salt: string | null
       role: $Enums.users_role
       created_at: Date
       updated_at: Date | null
@@ -22711,7 +22701,6 @@ export namespace Prisma {
     readonly email: FieldRef<"users", 'String'>
     readonly email_verified: FieldRef<"users", 'DateTime'>
     readonly password: FieldRef<"users", 'String'>
-    readonly salt: FieldRef<"users", 'String'>
     readonly role: FieldRef<"users", 'users_role'>
     readonly created_at: FieldRef<"users", 'DateTime'>
     readonly updated_at: FieldRef<"users", 'DateTime'>
@@ -26731,7 +26720,6 @@ export namespace Prisma {
     email: 'email',
     email_verified: 'email_verified',
     password: 'password',
-    salt: 'salt',
     role: 'role',
     created_at: 'created_at',
     updated_at: 'updated_at',
@@ -26964,7 +26952,6 @@ export namespace Prisma {
     name: 'name',
     email: 'email',
     password: 'password',
-    salt: 'salt',
     public_id: 'public_id',
     national_id: 'national_id',
     phone: 'phone',
@@ -28923,7 +28910,6 @@ export namespace Prisma {
     email?: StringFilter<"users"> | string
     email_verified?: DateTimeNullableFilter<"users"> | Date | string | null
     password?: StringFilter<"users"> | string
-    salt?: StringNullableFilter<"users"> | string | null
     role?: Enumusers_roleFilter<"users"> | $Enums.users_role
     created_at?: DateTimeFilter<"users"> | Date | string
     updated_at?: DateTimeNullableFilter<"users"> | Date | string | null
@@ -28954,7 +28940,6 @@ export namespace Prisma {
     email?: SortOrder
     email_verified?: SortOrderInput | SortOrder
     password?: SortOrder
-    salt?: SortOrderInput | SortOrder
     role?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrderInput | SortOrder
@@ -28992,7 +28977,6 @@ export namespace Prisma {
     name?: StringFilter<"users"> | string
     email_verified?: DateTimeNullableFilter<"users"> | Date | string | null
     password?: StringFilter<"users"> | string
-    salt?: StringNullableFilter<"users"> | string | null
     role?: Enumusers_roleFilter<"users"> | $Enums.users_role
     created_at?: DateTimeFilter<"users"> | Date | string
     updated_at?: DateTimeNullableFilter<"users"> | Date | string | null
@@ -29020,7 +29004,6 @@ export namespace Prisma {
     email?: SortOrder
     email_verified?: SortOrderInput | SortOrder
     password?: SortOrder
-    salt?: SortOrderInput | SortOrder
     role?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrderInput | SortOrder
@@ -29049,7 +29032,6 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"users"> | string
     email_verified?: DateTimeNullableWithAggregatesFilter<"users"> | Date | string | null
     password?: StringWithAggregatesFilter<"users"> | string
-    salt?: StringNullableWithAggregatesFilter<"users"> | string | null
     role?: Enumusers_roleWithAggregatesFilter<"users"> | $Enums.users_role
     created_at?: DateTimeWithAggregatesFilter<"users"> | Date | string
     updated_at?: DateTimeNullableWithAggregatesFilter<"users"> | Date | string | null
@@ -31195,7 +31177,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -31225,7 +31206,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -31254,7 +31234,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -31284,7 +31263,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -31314,7 +31292,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -31334,7 +31311,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -31354,7 +31330,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33542,7 +33517,6 @@ export namespace Prisma {
     email?: SortOrder
     email_verified?: SortOrder
     password?: SortOrder
-    salt?: SortOrder
     role?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
@@ -33568,7 +33542,6 @@ export namespace Prisma {
     email?: SortOrder
     email_verified?: SortOrder
     password?: SortOrder
-    salt?: SortOrder
     role?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
@@ -33589,7 +33562,6 @@ export namespace Prisma {
     email?: SortOrder
     email_verified?: SortOrder
     password?: SortOrder
-    salt?: SortOrder
     role?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
@@ -36160,7 +36132,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -36189,7 +36160,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -36233,7 +36203,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -36262,7 +36231,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -36290,7 +36258,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -36319,7 +36286,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -36631,7 +36597,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -36660,7 +36625,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -37014,7 +36978,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -37043,7 +37006,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -37139,7 +37101,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -37168,7 +37129,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -38152,7 +38112,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -38181,7 +38140,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -38414,7 +38372,6 @@ export namespace Prisma {
     email?: StringFilter<"users"> | string
     email_verified?: DateTimeNullableFilter<"users"> | Date | string | null
     password?: StringFilter<"users"> | string
-    salt?: StringNullableFilter<"users"> | string | null
     role?: Enumusers_roleFilter<"users"> | $Enums.users_role
     created_at?: DateTimeFilter<"users"> | Date | string
     updated_at?: DateTimeNullableFilter<"users"> | Date | string | null
@@ -38434,7 +38391,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -38463,7 +38419,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -38507,7 +38462,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -38536,7 +38490,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -39292,7 +39245,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -39321,7 +39273,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -39459,7 +39410,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -39488,7 +39438,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -39758,7 +39707,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -39787,7 +39735,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -39831,7 +39778,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -39860,7 +39806,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -40672,7 +40617,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -40701,7 +40645,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -40860,7 +40803,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -40889,7 +40831,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -40967,7 +40908,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -40996,7 +40936,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -41024,7 +40963,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -41053,7 +40991,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -41097,7 +41034,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -41126,7 +41062,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -41974,7 +41909,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42003,7 +41937,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42032,7 +41965,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42792,7 +42724,6 @@ export namespace Prisma {
     email: string
     email_verified?: Date | string | null
     password: string
-    salt?: string | null
     role?: $Enums.users_role
     created_at?: Date | string
     updated_at?: Date | string | null
@@ -42867,7 +42798,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42896,7 +42826,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42925,7 +42854,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     email_verified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     password?: StringFieldUpdateOperationsInput | string
-    salt?: NullableStringFieldUpdateOperationsInput | string | null
     role?: Enumusers_roleFieldUpdateOperationsInput | $Enums.users_role
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { Prisma, shared_status, users_role, users_status } from "@/generated/prisma";
 import { getPositiveIntParam } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/actions/currentUser";
+import hasPermission from "@/lib/auth/permission";
+import { SafeUser } from "@/lib/types";
 
 function parseUserSearchParams(params: URLSearchParams) {
   const result = {
@@ -21,6 +24,18 @@ function parseUserSearchParams(params: URLSearchParams) {
 }
 
 export async function GET(request: Request) {
+
+  const loggedInUser = await getCurrentUser() as SafeUser;
+  // Check authentication
+  if (!loggedInUser || !loggedInUser.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const isPermitted = await hasPermission(loggedInUser, "users", "read");
+  if (!isPermitted) {
+    return NextResponse.json({ message: "You don't have permission to view users!" }, { status: 403 });
+  }
+
   const { searchParams } = new URL(request.url);
   const { page, limit, branch_id, role, status, search } = parseUserSearchParams(searchParams);
 

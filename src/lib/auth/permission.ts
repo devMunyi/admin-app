@@ -1,9 +1,12 @@
 import { Prisma, users_role } from "@/generated/prisma";
 import { ALLOWED_ACTIONS, PERMISSION_COLUMNS } from "../constants";
 import prisma from "../prisma";
+import { SafeUser } from "../types";
+
+
 
 export default async function hasPermission(
-    user: { id: number; role: users_role },
+    user: { id: number; role: users_role, password_expiry: Date },
     tbl: string,
     act: string,
     rec = 0
@@ -33,7 +36,7 @@ export default async function hasPermission(
         const whereConditions: Prisma.permissionsWhereInput = {
             OR: [
                 { role: userRole },
-                { user_id: userId }
+                { user_id: user.id }
             ],
             tbl: tbl,
             rec: rec

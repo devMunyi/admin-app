@@ -6,6 +6,7 @@ export const env = createEnv({
     APP_NAME: z.string().min(1),
     DATABASE_URL: z.string().min(1),
     REDIS_URL: z.string().min(1),
+    REDIS_LOCAL_URL: z.string().min(1),
     REDIS_TOKEN: z.string().min(1),
     SINGLE_SESSION: z.coerce.boolean().default(true),
     SESSION_EXPIRATION_SECONDS: z.coerce.number().default(15),

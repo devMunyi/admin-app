@@ -5,38 +5,35 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { TabContent } from "@/components/events/TabContent";
 import { EventsTable } from "@/components/events/EventsTable";
-import { EventsResponse, TabData, UserInfo } from "@/components/events/type";
 import { UserDetailsTable } from "./UserDetailsTable";
 import { TabButton } from "@/components/events/TabButton";
 import { capitalizeString } from "@/lib/utils";
 import Button from "@/components/temp-ui/button/Button";
-import { User } from "../users-table";
-import { formatDateString } from "@/lib/dates";
-import { users, users_role, users_status } from "@/generated/prisma";
-import AddUserModal from "../add-user-modal";
 import EditUserModal from "../edit-user-modal";
 import { getBranches } from "@/lib/actions/util.action";
 import Link from "next/link";
+import { EventsResponse, TabData, UserInfo } from "@/lib/types";
+import { customFetch } from "@/lib/apiClient";
+import { fetchUserInfo } from "@/lib/services/api/users/requests";
 
 
 type UserDetailsProps = {
     userId: string;
     branches: Awaited<ReturnType<typeof getBranches>>;
-    onSucess?: () => void;
 }
 
 
 export default function UserDetails(
-    { userId, branches, onSucess }: UserDetailsProps
+    { userId, branches }: UserDetailsProps
 ) {
     const queryClient = useQueryClient();
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<string>("Info");
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
 
-    const handleEditUser = (user: User) => {
+    const handleEditUser = (user: UserInfo) => {
         setSelectedUser(user);
         setIsEditModalOpen(true);
     };
@@ -44,14 +41,14 @@ export default function UserDetails(
 
     // Fetch user info
 
-    const fetchUserInfo = async (userId: string) => {
-        const response = await fetch(`/api/users/${userId}`);
-        if (!response.ok) {
-            throw new Error("Failed to fetch user info");
-        }
-        const data = await response.json();
-        return data.data;
-    };
+    // const fetchUserInfo = async (userId: string) => {
+    //     const response = await customFetch(`/api/users/${userId}`);
+    //     if (!response.ok) {
+    //         throw new Error("Failed to fetch user info");
+    //     }
+    //     const data = await response.json();
+    //     return data.data;
+    // };
 
     const {
         data: userInfo,
@@ -59,7 +56,7 @@ export default function UserDetails(
         error: userError,
     } = useQuery<UserInfo>({
         queryKey: ["user", userId],
-        queryFn: () => fetchUserInfo(userId),
+        queryFn: () => fetchUserInfo(userId)
     });
 
     // Fetch events by user
@@ -70,7 +67,7 @@ export default function UserDetails(
     } = useQuery<EventsResponse>({
         queryKey: ["eventsBy", userId],
         queryFn: async () => {
-            const response = await fetch(`/api/users/${userId}/events?type=by`);
+            const response = await customFetch(`/api/users/${userId}/events?type=by`);
             if (!response.ok) {
                 throw new Error("Failed to fetch events by user");
             }
@@ -87,7 +84,7 @@ export default function UserDetails(
     } = useQuery<EventsResponse>({
         queryKey: ["eventsOn", userId],
         queryFn: async () => {
-            const response = await fetch(`/api/users/${userId}/events?type=on`);
+            const response = await customFetch(`/api/users/${userId}/events?type=on`);
             if (!response.ok) {
                 throw new Error("Failed to fetch events on user");
             }
@@ -195,6 +192,7 @@ export default function UserDetails(
         // queryClient.refetchQueries({ queryKey: ['eventsOn', userId] });
     };
 
+
     return (
         <div className="p-6 border border-gray-200 rounded-xl dark:border-gray-800">
             <div className="border-b border-gray-200 dark:border-gray-800">
@@ -228,6 +226,7 @@ export default function UserDetails(
                     selectedUser
                         ? {
                             id: selectedUser.id,
+                            public_id: selectedUser.public_id,
                             name: selectedUser.name,
                             phone: selectedUser.phone,
                             national_id: (selectedUser as any).national_id ?? "",
@@ -245,7 +244,7 @@ export default function UserDetails(
                 <Link
                     href="/users"
                     className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                    onClick={() => router.back()}
+                    onClick={() => router.push("/users")}
                 >
                     <ArrowLeftIcon /> Back
                 </Link>

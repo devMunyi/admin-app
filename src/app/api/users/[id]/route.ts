@@ -1,9 +1,13 @@
-import bcrypt from "bcryptjs";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { omit } from "@/lib/utils";
+import { capitalizeString, makePhoneValid, storeChangeLog } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/actions/currentUser";
 import { users_role, users_status } from "@/generated/prisma";
+import { getBranchesByUids, handleCrudError } from "@/lib/actions/util.action";
+import { editUserSchema } from "@/lib/validators/authSchema";
+import hasPermission from "@/lib/auth/permission";
+import { SafeUser } from "@/lib/types";
+import { hashPassword } from "@/lib/auth/password";
 
 
 export async function GET(
@@ -12,10 +16,8 @@ export async function GET(
 ) {
 
   const currentUser = await getCurrentUser();
-
-  // Check authentication
   if (!currentUser || !currentUser.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   const { id: userId } = await params;
@@ -28,7 +30,7 @@ export async function GET(
       name: true,
       phone: true,
       national_id: true,
-      branch:{
+      branch: {
         select: {
           id: true,
           name: true
@@ -43,85 +45,129 @@ export async function GET(
   });
 
   if (!user) {
-    return NextResponse.json({ error: "User not found." }, { status: 404 });
+    return NextResponse.json({ message: "User not found." }, { status: 404 });
   }
 
-  return NextResponse.json({ data: user })
+  return NextResponse.json({ user })
 
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  const currentUser = await getCurrentUser();
 
-  // Check authentication
-  if (!currentUser || !currentUser.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = await request.json();
-  const { email, name, password, role, status } = body;
-  const userId = params.id;
-
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Check if user exists
+    const { id: public_id } = await params;
+    const body = await req.json();
+    const { ...userData } = body;
+
+    const loggedInUser = await getCurrentUser({ withFullUser: true }) as SafeUser;
+
+    if (!loggedInUser) {
+      return NextResponse.json({ message: "Session expired" }, { status: 401 });
+    }
+
+    const isPermitted = await hasPermission(loggedInUser, "users", "update");
+    if (!isPermitted) {
+      return NextResponse.json({ message: "You don't have permission to update user!" }, { status: 403 });
+    }
+
+    const schema = editUserSchema.partial({ password: true });
+    const { success, data } = schema.safeParse(userData);
+    if (!success) {
+      return NextResponse.json({ message: "Invalid input" }, { status: 400 });
+    }
+
     const existingUser = await prisma.users.findUnique({
-      where: { id: Number(userId) },
+      where: { public_id: public_id, status: { not: users_status.DELETED } },
+      select: {
+        id: true, name: true, email: true, password: true,
+        role: true, status: true, national_id: true, phone: true,
+        branch_id: true, updated_at: true,
+      },
     });
 
     if (!existingUser) {
-      return NextResponse.json({ error: "User not found." }, { status: 404 });
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    // Check if email is being changed to one that already exists
-    if (email && email !== existingUser.email) {
-      const emailExists = await prisma.users.findUnique({
-        where: { email }
-      });
-
-      if (emailExists) {
-        return NextResponse.json(
-          { error: "Email already in use by another account." },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Prepare update data
-    const updateData: {
-      email?: string;
-      name?: string;
-      password?: string;
-      role?: users_role;
-      status?: users_status;
-    } = {
-      ...(email && { email }),
-      ...(name && { name }),
-      ...(role && { role: role }), // Explicitly cast role to User_role
-      ...(status && { status }),
+    const updateData: Partial<{
+      name: string;
+      email: string;
+      role: users_role;
+      status: users_status;
+      password: string;
+      national_id: string;
+      phone: string;
+      branch_id: number;
+    }> = {
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      status: data.status,
+      national_id: data.national_id,
+      phone: makePhoneValid(data.phone),
+      branch_id: data.branch_id,
     };
 
-    // Only hash and update password if provided
-    if (password) {
-      updateData.password = await bcrypt.hash(password, 12);
+    let otherDetails = "";
+    if (data.password) {
+      const hashedPassword = await hashPassword(data.password);
+      updateData.password = hashedPassword;
+      otherDetails = "Password updated.";
     }
 
-    // Update user
     const updatedUser = await prisma.users.update({
-      where: { id: Number(userId) },
-      data: updateData, // Ensure updateData matches the expected type
+      where: { id: existingUser.id },
+      data: updateData,
+      select: { id: true, role: true },
     });
 
-    const saferUser = omit(updatedUser, ["password"]);
-    return NextResponse.json(saferUser);
-  } catch (error) {
-    console.error("Error updating user:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    if (!updatedUser) {
+      throw new Error("Failed to update user");
+    }
+
+    let prevBranchName = "", newBranchName = "";
+    if (existingUser.branch_id !== data.branch_id) {
+      const branchIds = [existingUser.branch_id, data.branch_id].filter((id): id is number => id !== null && id !== undefined);
+      const branches = await getBranchesByUids(branchIds);
+      prevBranchName = branches.find(b => b.id === existingUser.branch_id)?.name || "";
+      newBranchName = branches.find(b => b.id === data.branch_id)?.name || "";
+    }
+
+    const originalData = {
+      name: existingUser.name,
+      email: existingUser.email,
+      branch: prevBranchName,
+      status: capitalizeString(existingUser.status.toString()),
+      phone: existingUser.phone,
+      national_id: existingUser.national_id,
+      role: capitalizeString(existingUser.role),
+    };
+
+    const newData = {
+      name: data.name,
+      email: data.email,
+      branch: newBranchName,
+      status: capitalizeString(data.status.toString()),
+      phone: data.phone,
+      national_id: data.national_id,
+      role: capitalizeString(data.role.toString()),
+    };
+
+    await storeChangeLog({
+      action: "update",
+      primaryAffectedEntity: `user[${existingUser.name}(${existingUser.email})]`,
+      primaryAffectedEntityID: existingUser.id,
+      primaryOrSecAffectedTable: "users",
+      primaryOrSecAffectedEntityID: existingUser.id,
+      originalData,
+      newData,
+      skipFields: [],
+      loggedInUser,
+      otherDetails,
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return handleCrudError(error);
   }
 }
-

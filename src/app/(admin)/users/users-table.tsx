@@ -1,44 +1,16 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import Image from "next/image";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/temp-ui/table";
 import Badge from "@/components/temp-ui/badge/Badge";
-import { DeleteIcon, EyeIcon, PencilIcon, X } from "lucide-react";
+import { EyeIcon, PencilIcon } from "lucide-react";
 import EditUserModal from "./edit-user-modal";
-import { capitalizeString } from "@/lib/utils";
-// import Button from "@/components/temp-ui/button/Button";
-import { users_role, users_status } from "@/generated/prisma";
+import { capitalizeString, castToString } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Button from "@/components/temp-ui/button/Button";
 import { formatDateString } from "@/lib/dates";
-import { getBranches } from "@/lib/actions/util.action";
-import AddUserModal from "./add-user-modal";
-// import { Button } from "@/components/ui/button";
-
-export type Branch = {
-  id: number;
-  name: string;
-}
-
-export type User = {
-  role: users_role;
-  status: users_status;
-  phone: string;
-  national_id: string;
-  branch: Branch;
-  name: string;
-  id: number;
-  public_id: string;
-  email: string;
-  image: string | null;
-  created_at: Date;
-}
-
-
-type UsersTableProps = {
-  users: User[];
-  onSucess?: () => void;
-  branches: Awaited<ReturnType<typeof getBranches>>;
-}
+import { User, UsersTableProps } from "@/lib/types";
+import { users_status } from "@/generated/prisma";
+import Avatar from "@/components/Avatar";
 
 export default function UsersTable(
   { users, onSucess, branches }: UsersTableProps
@@ -48,10 +20,10 @@ export default function UsersTable(
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const router = useRouter();
 
-  const handleEditClick = (user: User) => {
+  const handleEditClick = useCallback((user: User) => {
     setSelectedUser(user);
     setIsEditModalOpen(true);
-  };
+  }, []);
 
 
   return (
@@ -121,12 +93,7 @@ export default function UsersTable(
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 overflow-hidden rounded-full">
-                          <Image
-                            width={40}
-                            height={40}
-                            src={user.image || "/images/user/user-17.jpg"}
-                            alt={user.name}
-                          />
+                          <Avatar width={40} height={40} src={castToString(user.image)} alt="user" name={user.name} />
                         </div>
                         <div>
                           <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
@@ -210,6 +177,7 @@ export default function UsersTable(
           selectedUser
             ? {
               id: selectedUser.id,
+              public_id: selectedUser.public_id,
               name: selectedUser.name,
               phone: selectedUser.phone,
               national_id: (selectedUser as any).national_id ?? "",

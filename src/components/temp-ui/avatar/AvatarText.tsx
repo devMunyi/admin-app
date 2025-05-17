@@ -1,18 +1,28 @@
+// src/components/temp-ui/avatar/AvatarText.tsx
 import React from "react";
 
-interface AvatarTextProps {
+type AvatarTextProps = {
   name: string;
   className?: string;
+  width?: number;
+  height?: number;
+  fontSize?: number | string;
 }
 
-const AvatarText: React.FC<AvatarTextProps> = ({ name, className = "" }) => {
+const AvatarText: React.FC<AvatarTextProps> = ({
+  name,
+  className = "",
+  width = 40,
+  height = 40,
+  fontSize = "0.875rem"
+}) => {
   // Generate initials from name
   const initials = name
-    .split(" ")
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+    ?.split(" ")
+    ?.map((word) => word[0])
+    ?.join("")
+    ?.toUpperCase()
+    ?.slice(0, 2);
 
   // Generate a consistent pastel color based on the name
   const getColorClass = (name: string) => {
@@ -35,11 +45,20 @@ const AvatarText: React.FC<AvatarTextProps> = ({ name, className = "" }) => {
 
   return (
     <div
-      className={`flex h-10 w-10 ${className} items-center justify-center rounded-full ${getColorClass(
-        name
-      )}`}
+      className={`flex items-center justify-center rounded-full ${getColorClass(name)} ${className}`}
+      style={{
+        width: `${width}px`,
+        height: `${height}px`,
+      }}
     >
-      <span className="text-sm font-medium">{initials}</span>
+      <span
+        className="font-medium"
+        style={{
+          fontSize: typeof fontSize === 'number' ? `${fontSize}px` : fontSize
+        }}
+      >
+        {initials}
+      </span>
     </div>
   );
 };

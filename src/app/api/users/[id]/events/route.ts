@@ -17,7 +17,7 @@ export async function GET(
 
     // Check authentication
     if (!currentUser || !currentUser.id) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const { id: userId } = await params;
@@ -33,7 +33,7 @@ export async function GET(
         });
 
         if (!user) {
-            return NextResponse.json({ error: "User not found." }, { status: 404 });
+            return NextResponse.json({ message: "User not found." }, { status: 404 });
         }
 
         // Parse query parameters
@@ -87,7 +87,7 @@ export async function GET(
     } catch (error) {
         console.error("Error fetching user events:", error);
         return NextResponse.json(
-            { error: "Internal server error" },
+            { message: "Internal server error" },
             { status: 500 }
         );
     }

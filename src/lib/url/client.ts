@@ -2,8 +2,8 @@
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { UrlParts, CallbackUrlOptions } from './types';
 import { useEffect, useState } from 'react';
+import { CallbackUrlOptions, UrlParts } from '../types';
 
 export function useClientUrlParts(): UrlParts {
     const pathname = usePathname();

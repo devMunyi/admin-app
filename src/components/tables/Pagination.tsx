@@ -50,7 +50,7 @@ const Pagination = ({
   const visiblePages = getVisiblePages();
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between flex-wrap gap-4 px-2 py-3">
       {/* Rows per page selector - left side */}
       <div className="flex items-center gap-2">
         <span className="text-sm text-gray-600 dark:text-gray-400">Rows per page:</span>

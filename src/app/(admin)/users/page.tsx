@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 
 export default async function UsersPage() {
   const branches = await getBranches(); // Server-side fetch
-  return <UsersClientPage initialBranches={branches} />;
+  return <UsersClientPage initialBranches={branches} />
 }
