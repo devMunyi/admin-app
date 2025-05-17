@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "bunx prisma db seed",
-    "d:seed": "bun run src/db/seed.ts"
+    "d:seed": "bun run src/db/seed.ts",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "bun prisma/seed.ts"
@@ -46,6 +47,7 @@
     "drizzle-orm": "^0.43.1",
     "flatpickr": "^4.6.13",
     "framer-motion": "^12.10.5",
+    "ioredis": "^5.6.1",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.503.0",
@@ -65,13 +67,15 @@
     "react-hook-form": "^7.56.1",
     "react-hot-toast": "^2.5.2",
     "react-spinners": "^0.17.0",
+    "redis": "^4.7.0",
     "simplebar-react": "^3.3.0",
     "stream-browserify": "^3.0.0",
     "swiper": "^11.2.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss": "^4.0.0",
     "util": "^0.12.5",
-    "zod": "^3.24.3"
+    "zod": "^3.24.3",
+    "zustand": "^5.0.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

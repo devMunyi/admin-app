@@ -1,70 +1,69 @@
 import { users_role } from "@/generated/prisma";
-import { generateSalt, hashPassword } from "@/lib/auth/passwordHasher";
 import { nowDatetimeObject } from "@/lib/constants";
 import prisma from "@/lib/prisma";
 import { SeedUserData } from "@/lib/validators/authSchema";
 import { nanoid } from "nanoid";
+import { hashPassword } from "@/lib/auth/password";
 
 const usersData: SeedUserData[] = [
   {
-    name: "Sam Munyi",
-    phone: "254700000000",
+    name: "Samuel Munyi",
+    phone: "254712300000",
     national_id: "12345678",
     branch_id: 1,
     email: "samunyi90@gmail.com",
-    password: "test123",
+    password: "defaultPass",
     role: users_role.SUPER_ADMIN,
   },
   {
-    name: "John Doe",
-    phone: "254700000001",
-    national_id: "12345679",
+    name: "Kevin Otieno",
+    phone: "254712300001",
+    national_id: "23456781",
     branch_id: 1,
-    email: "john@mail.com",
-    password: "test123",
+    email: "kevin.otieno@example.com",
+    password: "defaultPass",
     role: users_role.ADMIN,
   },
   {
-    name: "Jane Doe",
-    phone: "254700000002",
-    national_id: "12345680",
+    name: "Aisha Mohammed",
+    phone: "254712300002",
+    national_id: "23456782",
     branch_id: 1,
-    email: "jane@mail.com",
-    password: "test123",
+    email: "aisha.mohammed@example.com",
+    password: "defaultPass",
     role: users_role.AGENT,
   },
   {
-    name: "Sam Munyi2",
-    phone: "254700000003",
-    national_id: "12345681",
+    name: "Brian Kiptoo",
+    phone: "254712300003",
+    national_id: "23456783",
     branch_id: 1,
-    email: "samunyi92@gmail.com",
-    password: "test123",
+    email: "brian.kiptoo@example.com",
+    password: "defaultPass",
     role: users_role.SUPER_ADMIN,
   },
   {
-    name: "John Doe2",
-    phone: "254700000004",
-    national_id: "12345682",
+    name: "Mercy Wanjiku",
+    phone: "254712300004",
+    national_id: "23456784",
     branch_id: 1,
-    email: "john2@mail.com",
-    password: "test123",
+    email: "mercy.wanjiku@example.com",
+    password: "defaultPass",
     role: users_role.ADMIN,
   },
   {
-    name: "Jane Doe2",
-    phone: "254700000005",
-    national_id: "12345683",
+    name: "David Njoroge",
+    phone: "254712300005",
+    national_id: "23456785",
     branch_id: 1,
-    email: "jane2@mail.com",
-    password: "test123",
+    email: "david.njoroge@example.com",
+    password: "defaultPass",
     role: users_role.AGENT,
   },
 ];
 
 
 type BranchData = {
-  public_id: string;
   name: string;
   location: string;
   created_at: Date;
@@ -75,21 +74,18 @@ const branchData: BranchData[] = [
     name: "HQ",
     location: "Nairobi",
     created_at: nowDatetimeObject(),
-    public_id: nanoid(),
   }
 ]
 
 async function main(usersData: SeedUserData[]) {
-
-  // create branhces 
+  // create branches 
   await Promise.all(
     branchData.map(async (branch) => {
-      const { name, location, public_id } = branch;
+      const { name, location } = branch;
 
       const existingBranch = await prisma.branches.findUnique({
         where: { name },
       });
-
 
       if (existingBranch) {
         console.log(`Branch ${name} already exists, status: ${existingBranch.status}`);
@@ -106,11 +102,8 @@ async function main(usersData: SeedUserData[]) {
     })
   );
 
-
-
   // create users
   await Promise.all(
-
     usersData.map(async (userData) => {
       const { name, email, password, role } = userData;
 
@@ -123,15 +116,14 @@ async function main(usersData: SeedUserData[]) {
         return;
       }
 
-      const salt = generateSalt();
-      const hashedPassword = await hashPassword(password, salt);
-
+      const hashedPassword = await hashPassword(password)
       await prisma.users.create({
         data: {
           name,
           email,
+          phone: userData.phone,
+          national_id: userData.national_id,
           password: hashedPassword,
-          salt,
           role,
           public_id: nanoid(),
           created_at: nowDatetimeObject()

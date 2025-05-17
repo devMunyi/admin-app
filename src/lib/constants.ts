@@ -3,9 +3,10 @@ import { capitalizeString } from "./utils";
 import { UserRoles, UserStatuses } from "@/db/enums";
 import dayjs from "dayjs";
 
-export const APP_NAME = "Toursync";
+export const APP_NAME = "TourSync";
 export const CURRENCY_SYMBOL = "$";
 export const DEFAULT_PAGE_SIZE = 7;
+
 
 export const userRoles = ["admin", "user"] as const;
 export const USER_ROLES = Object.entries(UserRoles).map(([key, value]) => ({

@@ -1,4 +1,4 @@
-import { TabButtonProps } from "./type";
+import { TabButtonProps } from "@/lib/types";
 
 export const TabButton: React.FC<TabButtonProps> = ({
     label,

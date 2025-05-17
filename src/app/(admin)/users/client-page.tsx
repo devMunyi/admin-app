@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ComponentCard from "@/components/common/ComponentCard";
-import UsersTable, { User } from "./users-table";
+import UsersTable from "./users-table";
 import Button from "@/components/temp-ui/button/Button";
 import Input from "@/components/temp-ui/form/input/InputField";
 import AddUserModal from "./add-user-modal";
@@ -12,32 +12,9 @@ import { DEFAULT_PAGE_SIZE, USER_ROLES, USER_STATUSES } from "@/lib/constants";
 import Pagination from "@/components/tables/Pagination";
 import { useRouter } from "next/navigation";
 import Select from "@/components/temp-ui/form/Select";
-import { ChevronDownIcon } from "@/icons";
 import { getBranches } from "@/lib/actions/util.action";
-
-type UserFilters = {
-  page: number;
-  rpp: number;
-  branch?: string;
-  role?: string;
-  status?: string;
-  search?: string;
-};
-
-type ApiResponse = {
-  data: User[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-};
-
-
-type UsersClientPageProps = {
-  initialBranches: Awaited<ReturnType<typeof getBranches>>;
-}
+import { FindUsersApiResponse, UsersClientPageProps } from "@/lib/types";
+import { useUsersQuery } from "@/lib/services/api/users/queries";
 
 export default function UsersClientPage({
   initialBranches
@@ -60,66 +37,51 @@ export default function UsersClientPage({
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
+  const searchTimeoutRef = useRef<number | undefined>(undefined); // Changed to `number` for Bun compatibility
 
-  const filters = {
+  const disabledFilterResetBtn = useMemo(() =>
+    role === "" && status === "" && !search && page === 1 && rpp === DEFAULT_PAGE_SIZE && branch === "",
+    [role, status, search, page, rpp, branch]
+  );
+
+  const filters = useMemo(() => ({
     page,
     rpp,
     role: role !== "" ? role : undefined,
     branch: branch !== "" ? branch : undefined,
     status: status !== "" ? status : undefined,
     search: search || undefined
-  };
+  }), [page, rpp, role, branch, status, search]);
 
-  const fetchUsers = async (filters: UserFilters): Promise<ApiResponse> => {
-    const params = new URLSearchParams();
-    params.append("page", filters.page.toString());
-    params.append("limit", filters.rpp.toString());
-    if (filters.branch) params.append("branch_id", filters.branch);
-    if (filters.role) params.append("role", filters.role);
-    if (filters.status) params.append("status", filters.status);
-    if (filters.search) params.append("search", filters.search);
-
-    const response = await fetch(`/api/users/findMany?${params.toString()}`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch users");
-    }
-    return response.json();
-  };
-
-  const { data, isLoading, error, isFetching } = useQuery<ApiResponse>({
-    queryKey: ['users', filters],
-    queryFn: () => fetchUsers(filters),
-    placeholderData: () => queryClient.getQueryData<ApiResponse>(['users', filters]),
-    staleTime: 60 * 1000, // 1 minute
-  });
-
+  const { data, isLoading, error, isFetching } = useUsersQuery(filters);
 
   useEffect(() => {
     if (error) {
       router.refresh();
-      queryClient.setQueryData<ApiResponse>(['users', filters], undefined);
+      queryClient.setQueryData<FindUsersApiResponse>(['users', filters], undefined);
     }
   }, [error, router]);
 
+  const branchOptions = useMemo(() =>
+    (initialBranches ?? []).map(b => ({
+      value: String(b.id),
+      label: b.name
+    })),
+    [initialBranches]);
 
-  const handlePageChange = (newPage: number) => {
+
+  const handlePageChange = useCallback((newPage: number) => {
     setPage(newPage);
-  };
+  }, []);
 
-  const handleRowsPerPageChange = (newRpp: number) => {
+
+  const handleRowsPerPageChange = useCallback((newRpp: number) => {
     setRpp(newRpp);
-    setPage(1); // Reset to first page when changing rows per page
-  };
+    setPage(1);
+  }, []);
 
-  // const handleRoleChange = (newRole: string) => {
-  //   setRole(newRole);
-  // };
 
-  // const handleStatusChange = (newStatus: string) => {
-  //   setStatus(newStatus);
-  // };
-
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setPage(1);
     setRpp(DEFAULT_PAGE_SIZE);
     setRole("");
@@ -127,37 +89,62 @@ export default function UsersClientPage({
     setSearch("");
     setBranch("");
     if (searchRef.current) searchRef.current.value = "";
-  };
+  }, []);
 
-  const handleSearchBtnClick = () => {
+  const handleSearchBtnClick = useCallback(() => {
     const searchValue = searchRef.current?.value;
     setSearch(searchValue?.trim() || "");
-  };
+  }, []);
 
-  const handlePageRefresh = () => {
+  const handlePageRefresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['users'] });
     if (page !== 1) setPage(1);
-  };
+  }, [page, queryClient]);
 
-  const handleAddUserClick = () => {
+  const handleAddUserClick = useCallback(() => {
     setIsAddUserModalOpen(true);
-  };
+  }, []);
 
-  const disabledFilterResetBtn = role === "" && status === "" && !search && page === 1 && rpp === 7 && branch === "";
+
+  const handleSearchInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Update input value without triggering state yet
+    if (searchRef.current) {
+      searchRef.current.value = e.target.value;
+    }
+
+    // Set up debounce (500ms delay)
+    searchTimeoutRef.current = window.setTimeout(() => {
+      const searchValue = e.target.value;
+      setSearch(searchValue.trim() || "");
+    }, 500);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="space-y-1">
       <PageBreadcrumb pageTitle="Users" />
 
       <ComponentCard title="User List">
-        <div className="flex flex-col gap-4 mb-4">
-          <div className="flex justify-between gap-4">
-            <div className="flex justify-between gap-4">
+        <div className="flex flex-col gap-4 mb-4 flex-wrap">
+          <div className="flex justify-between gap-4 flex-wrap">
+            <div className="flex justify-between gap-4 flex-wrap">
               {/* Filters */}
               <div>
                 <Button
                   type="button"
-                  size="md"
+                  size="sm"
                   variant="outline"
                   onClick={handleClearFilters}
                   disabled={disabledFilterResetBtn}
@@ -168,10 +155,7 @@ export default function UsersClientPage({
 
               <div>
                 <Select
-                  options={(initialBranches ?? []).map(b => ({
-                    value: String(b.id),
-                    label: b.name
-                  }))}
+                  options={branchOptions}
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
                   placeholder='Select Branch'
@@ -185,9 +169,6 @@ export default function UsersClientPage({
                   onChange={(e) => setRole(e.target.value)}
                   placeholder="Select Role"
                 />
-                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                  <ChevronDownIcon />
-                </span>
               </div>
 
               <div>
@@ -197,9 +178,6 @@ export default function UsersClientPage({
                   onChange={(e) => setStatus(e.target.value)}
                   placeholder="Select Status"
                 />
-                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                  <ChevronDownIcon />
-                </span>
               </div>
             </div>
 
@@ -208,13 +186,6 @@ export default function UsersClientPage({
                 Add User
               </Button>
             </div>
-
-            <AddUserModal
-              isOpen={isAddUserModalOpen}
-              onClose={() => setIsAddUserModalOpen(false)}
-              onSuccess={handlePageRefresh}
-              initialBranches={branches} // Pass to modal
-            />
           </div>
 
           <div className="flex justify-between gap-4">
@@ -223,8 +194,8 @@ export default function UsersClientPage({
                 placeholder="Search by name or email"
                 type="search"
                 ref={searchRef}
-                className=""
-                onChange={(e) => setSearch(e.target.value)}
+                className="h-9.5"
+                onChange={handleSearchInputChange}
               />
             </div>
 
@@ -243,7 +214,7 @@ export default function UsersClientPage({
 
         {error ? (
           <div className="p-4 text-red-500 rounded-lg bg-red-50 dark:bg-red-900/20">
-            Error loading users: {(error as Error).message}
+            {(error as Error).message}
           </div>
         ) : isLoading || isFetching ? (
           <div className="flex items-center justify-center p-8">
@@ -271,13 +242,14 @@ export default function UsersClientPage({
           </>
         )}
 
-        <AddUserModal
-          isOpen={isAddUserModalOpen}
-          onClose={() => setIsAddUserModalOpen(false)}
-          onSuccess={handlePageRefresh}
-          initialBranches={initialBranches} // Pass to modal
-        />
       </ComponentCard>
+
+      <AddUserModal
+        isOpen={isAddUserModalOpen}
+        onClose={() => setIsAddUserModalOpen(false)}
+        onSuccess={handlePageRefresh}
+        initialBranches={initialBranches} // Pass to modal
+      />
     </div>
   );
 }

@@ -9,48 +9,29 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Form from "../temp-ui/form/Form";
 import { signInFormInferSchema, signInFormSchema } from "@/lib/validators/authSchema";
-import { signIn } from "@/lib/actions/auth.action";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { Loader2, CheckCircle2 } from "lucide-react"; // Added CheckCircle2 icon
+import { Loader2, CheckCircle2 } from "lucide-react";
 import ComponentCard from "../common/ComponentCard";
-import { useSignedInRedirctUrl } from "@/hooks/useCallbackUrl";
+import { useSignInMutation } from "@/lib/services/api/users/mutation"; // Import the custom hook
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [pending, setPending] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  const router = useRouter();
-  const signedInRedirectUrl = useSignedInRedirctUrl();
-
   const {
     register,
     handleSubmit,
-    formState: { errors, touchedFields },
+    formState: { errors },
   } = useForm<signInFormInferSchema>({
     resolver: zodResolver(signInFormSchema),
     defaultValues: {
       email: "samunyi90@gmail.com",
-      password: "test123",
+      password: "defaultPass",
     },
     reValidateMode: "onChange",
   });
 
+  const signInMutation = useSignInMutation(); // Use the custom hook
+
   const onSubmit = (data: signInFormInferSchema) => {
-    setPending(true);
-    signIn(data).then(() => {
-      toast.success("Success! Please wait...");
-      setPending(false);
-      setSuccess(true);
-      setTimeout(() => {
-        router.push(signedInRedirectUrl);
-      }, 1000); // Added slight delay to show success state
-    }).catch((error) => {
-      toast.error(error.message || "Something went wrong");
-      setPending(false);
-      setSuccess(false); // Reset success state on error
-    })
+    signInMutation.mutate(data);
   };
 
   return (
@@ -109,15 +90,13 @@ export default function SignInForm() {
                     className="w-full"
                     size="md"
                     type="submit"
-                    disabled={pending || success} // Disable when success
-                  // variant={pending || success ? "outline" : "primary"} // Change variant when pending or success
+                    disabled={signInMutation.isPending || signInMutation.isSuccess}
                   >
-                    {pending ? (
+                    {signInMutation.isPending ? (
                       <Loader2 className="animate-spin" size="24" />
-                    ) : success ? (
+                    ) : signInMutation.isSuccess ? (
                       <div className="flex items-center gap-2 text-success-500">
                         <CheckCircle2 size="24" />
-                        {/* Success */}
                       </div>
                     ) : (
                       "Submit"

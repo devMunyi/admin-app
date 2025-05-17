@@ -1,3 +1,5 @@
+// src/app/layout.tsx
+
 import { Outfit } from 'next/font/google';
 import './globals.css';
 
@@ -6,20 +8,18 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import ClientOnly from '@/components/common/ClientOnly';
 import { QueryProvider } from './providers/QueryProvider';
 import ToasterProvider from './providers/ToasterProvider';
-import { UserProvider } from '@/context/UserContext';
-import { getCurrentUser } from '@/lib/actions/currentUser';
-import { HeroProvider } from './providers/HeroProvider';
+import HydrateZustand from '@/components/HydrateZustand'; // Add this import
 
 const outfit = Outfit({
-  subsets: ["latin"],
+  subsets: ['latin'],
 });
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getCurrentUser({ withFullUser: true, redirectIfNotFound: false });
+
   return (
     <html lang="en">
       <body className={`${outfit.className} dark:bg-gray-900`}>
@@ -27,13 +27,10 @@ export default async function RootLayout({
           <ClientOnly>
             <QueryProvider>
               <ToasterProvider />
-              <UserProvider user={user}>
-                <SidebarProvider>
-                  <HeroProvider> {/* Add this provider */}
-                    {children}
-                  </HeroProvider>
-                </SidebarProvider>
-              </UserProvider>
+              <HydrateZustand /> {/* Add this line */}
+              <SidebarProvider>
+                {children}
+              </SidebarProvider>
             </QueryProvider>
           </ClientOnly>
         </ThemeProvider>

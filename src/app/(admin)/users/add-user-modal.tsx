@@ -6,17 +6,13 @@ import Button from "@/components/temp-ui/button/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import toast from "react-hot-toast";
-import { useState } from "react";
 import Form from '@/components/temp-ui/Form';
 import Label from '@/components/temp-ui/form/Label';
 import Input from '@/components/temp-ui/form/input/InputField';
 import { USER_ROLES } from '@/lib/constants';
 import { CreateUserValues, createUserSchema } from '@/lib/validators/authSchema';
 import Select from '@/components/temp-ui/form/Select';
-import { createUser } from '@/lib/actions/user.action';
-import { useRouter } from 'next/navigation';
-import { useClientCallbackUrl } from '@/lib/url/client';
+import { useCreateUserMutation } from '@/lib/services/api/users/mutation';
 
 type AddUserModalProps = {
   isOpen: boolean;
@@ -26,11 +22,6 @@ type AddUserModalProps = {
 }
 
 export default function AddUserModal({ isOpen, onClose, onSuccess, initialBranches }: AddUserModalProps) {
-  const [pending, setPending] = useState(false);
-  const router = useRouter();
-  const callbackUrl = useClientCallbackUrl({ includeOrigin: true });
-
-
   const {
     register,
     handleSubmit,
@@ -50,25 +41,15 @@ export default function AddUserModal({ isOpen, onClose, onSuccess, initialBranch
     reValidateMode: "onChange",
   });
 
-  const onSubmit = (data: CreateUserValues) => {
-    setPending(true);
-    createUser(data).then((resp) => {
-      toast.success("User created successfully!");
-      reset();
-      // onClose();
-      onSuccess?.();
-    }).catch((error) => {
-      const message = error?.message || "Something went wrong";
-      if (message.toLowerCase() === "session expired") {
-        console.log({ callbackUrl })
-        router.push(`/signin?callbackUrl=${callbackUrl}`);
-      }
-      toast.error(message);
-    }).finally(() => {
-      setPending(false);
-    })
-  }
+  const { mutate: createUserMutate, isPending: pending } = useCreateUserMutation({
+    onSuccess,
+    onClose,
+    resetForm: reset
+  });
 
+  const onSubmit = (data: CreateUserValues) => {
+    createUserMutate(data);
+  };
 
   return (
     <Modal

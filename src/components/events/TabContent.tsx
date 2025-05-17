@@ -1,4 +1,4 @@
-import { TabContentProps } from "./type";
+import { TabContentProps } from "@/lib/types";
 
 export const TabContent: React.FC<TabContentProps> = ({ children, isActive }) => {
     if (!isActive) return null;

@@ -1,6 +1,6 @@
 
+import { UserEvent } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../temp-ui/table";
-import { UserEvent } from "./type";
 export const EventsTable: React.FC<{ events: UserEvent[]; isLoading: boolean }> = ({
     events,
     isLoading,

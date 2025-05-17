@@ -1,6 +1,6 @@
 // lib/url/server.ts
 import { headers } from 'next/headers';
-import { UrlParts, CallbackUrlOptions } from './types';
+import { CallbackUrlOptions, UrlParts } from '../types';
 
 export async function getServerUrlParts(): Promise<UrlParts> {
     const headersList = await headers();
